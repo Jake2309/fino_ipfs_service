@@ -1,22 +1,25 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import {
-  FinoImage,
-  FinoImageSchema,
-} from 'src/schemas/nft-image/fino-image.schema';
-import { FinoImageController } from 'src/controllers/fino-image/fino-image.controller';
-import { FinoImageRepository } from 'src/repositories/fino-image/fino-image.repo';
+import * as finoImageSchema from '../../schemas/nft-image/fino-image.schema.js';
+import * as finoImageController from '../../controllers/fino-image/fino-image.controller.js';
+import * as finoImageRepo from '../../repositories/fino-image/fino-image.repo.js';
 // import { FinoImageRepositoryInterface } from 'src/repositories/fino-image/fino-image.interface';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: FinoImage.name, schema: FinoImageSchema },
+      {
+        name: finoImageSchema.FinoImage.name,
+        schema: finoImageSchema.FinoImageSchema,
+      },
     ]),
   ],
   providers: [
-    { provide: 'FinoImageRepository', useClass: FinoImageRepository },
+    {
+      provide: 'FinoImageRepository',
+      useClass: finoImageRepo.FinoImageRepository,
+    },
   ],
-  controllers: [FinoImageController],
+  controllers: [finoImageController.FinoImageController],
 })
 export class FinoImageModule {}

@@ -1,16 +1,16 @@
 import { Controller, Get, Inject, Post } from '@nestjs/common';
-import { UploadFinoImgRequest } from 'src/model/fino-image/image-upload.model';
-import { FinoImageRepositoryInterface } from 'src/repositories/fino-image/fino-image.interface';
+import * as imageUploadModel from '../../model/fino-image/image-upload.model.js';
+import * as finoImageInterface from '../../repositories/fino-image/fino-image.interface.js';
 
 @Controller('api/fino-image')
 export class FinoImageController {
   constructor(
     @Inject('FinoImageRepository')
-    private readonly finoImageRepository: FinoImageRepositoryInterface,
+    private readonly finoImageRepository: finoImageInterface.FinoImageRepositoryInterface,
   ) {}
 
   @Post()
-  async upload(files: UploadFinoImgRequest[]) {
+  async upload(files: imageUploadModel.UploadFinoImgRequest[]) {
     return this.finoImageRepository.upload(files);
   }
 

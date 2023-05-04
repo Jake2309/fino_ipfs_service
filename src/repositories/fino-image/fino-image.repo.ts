@@ -1,20 +1,26 @@
-import { ImageResponse } from 'src/model/fino-image/image-response.model';
-import { UploadFinoImgRequest } from 'src/model/fino-image/image-upload.model';
-import { FinoImageRepositoryInterface } from './fino-image.interface';
+import * as imageResponseModel from '../../model/fino-image/image-response.model.js';
+import * as imageUploadModel from '../../model/fino-image/image-upload.model.js';
+import * as finoImageInterface from '../fino-image/fino-image.interface.js';
 import { injectable } from 'tsyringe';
-import { FinoImage } from 'src/schemas/nft-image/fino-image.schema';
+import * as finoImageSchema from '../../schemas/nft-image/fino-image.schema.js';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import * as IPFS from 'ipfs-core';
 
 @injectable()
-export class FinoImageRepository implements FinoImageRepositoryInterface {
+export class FinoImageRepository
+  implements finoImageInterface.FinoImageRepositoryInterface
+{
   constructor(
-    @InjectModel(FinoImage.name) private finoImgModel: Model<FinoImage>,
+    @InjectModel(finoImageSchema.FinoImage.name)
+    private finoImgModel: Model<finoImageSchema.FinoImage>,
   ) {}
 
   async upload(
-    files: UploadFinoImgRequest[],
-  ): Promise<ImageResponse | ImageResponse[]> {
+    files: imageUploadModel.UploadFinoImgRequest[],
+  ): Promise<
+    imageResponseModel.ImageResponse | imageResponseModel.ImageResponse[]
+  > {
     if (Array.isArray(files)) {
       const paths = await Promise.all(
         files.map(async (file) => this.uploadFile(file)),
@@ -26,20 +32,20 @@ export class FinoImageRepository implements FinoImageRepositoryInterface {
     return { ipfsName: path };
   }
 
-  private async uploadFile(file: UploadFinoImgRequest): Promise<string> {
+  private async uploadFile(
+    file: imageUploadModel.UploadFinoImgRequest,
+  ): Promise<string> {
     const ipfs = await this.loadIpfs();
-    const result = await ipfs.add(file.content);
+    const result = await ipfs.add(file);
     console.log(result);
 
     return result.path;
   }
 
   private async loadIpfs() {
-    const { create } = await import('ipfs-core');
+    // const { create } = await import('ipfs-core');
 
-    const node = await create({
-      // ... config here
-    });
+    const node = await IPFS.create();
 
     return node;
   }

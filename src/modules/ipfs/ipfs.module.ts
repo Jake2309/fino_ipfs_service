@@ -1,14 +1,21 @@
 import { Module } from '@nestjs/common';
-import { IpfsController } from '../../controllers/ipfs/ipfs.controller';
+import * as ipfsController from '../../controllers/ipfs/ipfs.controller.js';
 import { MongooseModule } from '@nestjs/mongoose';
-import { NFT, NFTSchema } from 'src/schemas/nft-info/nft.schema';
-import { FinoImageRepository } from 'src/repositories/fino-image/fino-image.repo';
+import * as nftSchema from '../../schemas/nft-info/nft.schema.js';
+import * as finoImageRepo from '../../repositories/fino-image/fino-image.repo.js';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: NFT.name, schema: NFTSchema }])],
-  providers: [
-    { provide: 'FinoImageRepository', useClass: FinoImageRepository },
+  imports: [
+    MongooseModule.forFeature([
+      { name: nftSchema.NFT.name, schema: nftSchema.NFTSchema },
+    ]),
   ],
-  controllers: [IpfsController],
+  providers: [
+    {
+      provide: 'FinoImageRepository',
+      useClass: finoImageRepo.FinoImageRepository,
+    },
+  ],
+  controllers: [ipfsController.IpfsController],
 })
 export class IpfsModule {}

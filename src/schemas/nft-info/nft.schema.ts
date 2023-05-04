@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { FinoImage } from '../nft-image/fino-image.schema';
+import * as finoImageSchema from '../nft-image/fino-image.schema.js';
 
 export type NFTDocument = HydratedDocument<NFT>;
 
@@ -18,7 +18,7 @@ export class NFT {
   @Prop({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'FinoImage' }],
   })
-  images: FinoImage[];
+  images: finoImageSchema.FinoImage[];
 
   @Prop()
   totalSupply: number;
