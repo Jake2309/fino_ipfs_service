@@ -1,8 +1,4 @@
-import * as imageResponseModel from '../../model/fino-image/image-response.model.js';
-import * as imageUploadModel from '../../model/fino-image/image-upload.model.js';
-import * as finoImageInterface from '../fino-image/fino-image.interface.js';
 import { injectable } from 'tsyringe';
-import * as finoImageSchema from '../../schemas/nft-image/fino-image.schema.js';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as IPFS from 'ipfs-core';
@@ -15,31 +11,30 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { ImageResponse } from '../../model/fino-image/image-response.model.js';
+import { FinoImageRepositoryInterface } from '../fino-image/fino-image.interface.js';
+import { FinoImage } from '../../schemas/nft-image/fino-image.schema.js';
 
 @injectable()
-export class FinoImageRepository
-  implements finoImageInterface.FinoImageRepositoryInterface
-{
+export class FinoImageRepository implements FinoImageRepositoryInterface {
   constructor(
-    @InjectModel(finoImageSchema.FinoImage.name)
-    private finoImgModel: Model<finoImageSchema.FinoImage>,
+    @InjectModel(FinoImage.name)
+    private finoImgModel: Model<FinoImage>,
   ) {}
 
   @UseInterceptors(FilesInterceptor('files'))
   async upload(
     @UploadedFiles() files: Array<Express.Multer.File>,
-  ): Promise<
-    imageResponseModel.ImageResponse | imageResponseModel.ImageResponse[]
-  > {
+  ): Promise<ImageResponse | ImageResponse[]> {
     if (Array.isArray(files)) {
-      const paths = await Promise.all(
+      const ipfsList = await Promise.all(
         files.map(async (file) => this.uploadFile(file)),
       );
-      return paths.map((path) => ({ ipfsName: path }));
+      return ipfsList;
     }
 
-    const path = await this.uploadFile(files);
-    return { ipfsName: path };
+    const ipfs = await this.uploadFile(files);
+    return ipfs;
   }
 
   private async uploadFile(
@@ -52,20 +47,19 @@ export class FinoImageRepository
       }),
     )
     file: Express.Multer.File,
-  ): Promise<string> {
-    const ipfs = await this.loadIpfs();
-    console.log(file);
-    const result = await ipfs.add(file.buffer);
-    console.log(result);
-
-    return result.path;
-  }
-
-  private async loadIpfs() {
-    // const { create } = await import('ipfs-core');
-
+  ): Promise<ImageResponse> {
     const node = await IPFS.create();
+    // console.log(file);
+    const result = await node.add(file.buffer);
+    console.log(result);
+    const ipfsModel: ImageResponse = {
+      path: result.path,
+      cid: result.cid,
+      size: result.size,
+      mode: result.mode,
+      mtime: result.mtime,
+    };
 
-    return node;
+    return ipfsModel;
   }
 }

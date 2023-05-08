@@ -1,3 +1,7 @@
 export interface ImageResponse {
-  ipfsName: string;
+  path: string;
+  cid: string;
+  size?: number;
+  mode?: number;
+  mtime?: string;
 }
